@@ -2,26 +2,102 @@
 @tailwind components;
 @tailwind utilities;
 
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
-}
-
-@media (prefers-color-scheme: dark) {
+@layer base {
   :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+    /* LinkedIn-inspired color scheme */
+    --background: 0 0% 98%; /* Light gray background like LinkedIn */
+    --foreground: 210 24% 16%; /* Dark blue-gray text */
+
+    --card: 0 0% 100%; /* White cards */
+    --card-foreground: 210 24% 16%;
+
+    --popover: 0 0% 100%;
+    --popover-foreground: 210 24% 16%;
+
+    /* LinkedIn blue as primary */
+    --primary: 201 100% 35%; /* LinkedIn's signature blue #0A66C2 */
+    --primary-foreground: 0 0% 100%;
+
+    --secondary: 210 16% 93%; /* Light blue-gray */
+    --secondary-foreground: 210 24% 16%;
+
+    --muted: 210 16% 96%; /* Very light gray */
+    --muted-foreground: 210 12% 40%;
+
+    --accent: 201 90% 94%; /* Light blue accent */
+    --accent-foreground: 201 100% 35%;
+
+    --destructive: 0 84% 60%; /* Red for errors */
+    --destructive-foreground: 0 0% 100%;
+
+    --border: 210 20% 90%; /* Light borders */
+    --input: 210 20% 90%;
+    --ring: 201 100% 35%; /* LinkedIn blue focus ring */
+
+    --radius: 0.5rem; /* Slightly rounded like LinkedIn */
+  }
+
+  .dark {
+    --background: 210 30% 8%; /* Dark blue-gray background */
+    --foreground: 0 0% 95%;
+
+    --card: 210 24% 12%;
+    --card-foreground: 0 0% 95%;
+
+    --popover: 210 24% 12%;
+    --popover-foreground: 0 0% 95%;
+
+    --primary: 201 100% 50%; /* Lighter blue for dark mode */
+    --primary-foreground: 210 30% 8%;
+
+    --secondary: 210 24% 16%;
+    --secondary-foreground: 0 0% 95%;
+
+    --muted: 210 24% 16%;
+    --muted-foreground: 210 12% 65%;
+
+    --accent: 201 90% 20%;
+    --accent-foreground: 201 100% 50%;
+
+    --destructive: 0 84% 60%;
+    --destructive-foreground: 0 0% 100%;
+
+    --border: 210 24% 20%;
+    --input: 210 24% 20%;
+    --ring: 201 100% 50%;
   }
 }
 
-body {
-  color: var(--foreground);
-  background: var(--background);
-  font-family: Arial, Helvetica, sans-serif;
+@layer base {
+  * {
+    @apply border-border;
+  }
+  body {
+    @apply bg-background text-foreground;
+    font-feature-settings: "rlig" 1, "calt" 1;
+  }
 }
 
+/* LinkedIn-style scrollbar */
 @layer utilities {
   .text-balance {
     text-wrap: balance;
+  }
+
+  .scrollbar-thin::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+  }
+
+  .scrollbar-thin::-webkit-scrollbar-track {
+    @apply bg-muted;
+  }
+
+  .scrollbar-thin::-webkit-scrollbar-thumb {
+    @apply bg-border rounded-full;
+  }
+
+  .scrollbar-thin::-webkit-scrollbar-thumb:hover {
+    @apply bg-primary/40;
   }
 }
