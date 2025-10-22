@@ -8,7 +8,7 @@ import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
 import { Label } from '@/components/ui/label'
 import { Select } from '@/components/ui/select'
-import { ArrowLeft } from 'lucide-react'
+import { ArrowLeft, Sparkles, Copy, Check } from 'lucide-react'
 import Link from 'next/link'
 
 interface Venture {
@@ -16,16 +16,26 @@ interface Venture {
   venture_name: string
 }
 
+interface GeneratedContent {
+  postText: string
+  characterCount: number
+  altText?: string
+}
+
 export default function NewContentPage() {
   const router = useRouter()
   const [loading, setLoading] = useState(false)
+  const [streaming, setStreaming] = useState(false)
   const [ventures, setVentures] = useState<Venture[]>([])
+  const [generatedContent, setGeneratedContent] = useState<GeneratedContent | null>(null)
+  const [streamedText, setStreamedText] = useState('')
+  const [copied, setCopied] = useState(false)
   const [formData, setFormData] = useState({
     venture_id: '',
-    content_type: 'post',
     tone: 'professional',
     topic: '',
-    keywords: '',
+    maxLength: 1500,
+    useStreaming: false,
   })
 
   useEffect(() => {
@@ -46,17 +56,132 @@ export default function NewContentPage() {
     fetchVentures()
   }, [])
 
+  async function handleGenerateStreaming() {
+    setStreaming(true)
+    setStreamedText('')
+    setGeneratedContent(null)
+
+    try {
+      const response = await fetch('/api/dev-auth/ai/generate', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          topic: formData.topic,
+          tone: formData.tone,
+          maxLength: formData.maxLength,
+          stream: true,
+        }),
+      })
+
+      if (!response.ok) {
+        throw new Error('Failed to generate content')
+      }
+
+      const reader = response.body?.getReader()
+      const decoder = new TextDecoder()
+
+      if (!reader) {
+        throw new Error('No reader available')
+      }
+
+      let fullText = ''
+
+      while (true) {
+        const { done, value } = await reader.read()
+        if (done) break
+
+        const chunk = decoder.decode(value)
+        const lines = chunk.split('\n')
+
+        for (const line of lines) {
+          if (line.startsWith('data: ')) {
+            const jsonStr = line.slice(6)
+            try {
+              const data = JSON.parse(jsonStr)
+              if (data.delta) {
+                fullText += data.delta
+                setStreamedText(fullText)
+              } else if (data.done) {
+                setGeneratedContent({
+                  postText: fullText,
+                  characterCount: fullText.length,
+                })
+              }
+            } catch (e) {
+              // Skip invalid JSON
+            }
+          }
+        }
+      }
+    } catch (error) {
+      console.error('Error streaming content:', error)
+      alert('Failed to generate content. Please try again.')
+    } finally {
+      setStreaming(false)
+    }
+  }
+
+  async function handleGenerateNonStreaming() {
+    setLoading(true)
+    setGeneratedContent(null)
+
+    try {
+      const response = await fetch('/api/dev-auth/ai/generate', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          topic: formData.topic,
+          tone: formData.tone,
+          maxLength: formData.maxLength,
+          stream: false,
+        }),
+      })
+
+      if (!response.ok) {
+        throw new Error('Failed to generate content')
+      }
+
+      const data = await response.json()
+      setGeneratedContent(data.draft)
+    } catch (error) {
+      console.error('Error generating content:', error)
+      alert('Failed to generate content. Please try again.')
+    } finally {
+      setLoading(false)
+    }
+  }
+
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
-    setLoading(true)
 
+    if (formData.useStreaming) {
+      await handleGenerateStreaming()
+    } else {
+      await handleGenerateNonStreaming()
+    }
+  }
+
+  async function handleSaveToDatabase() {
+    if (!generatedContent) return
+
+    setLoading(true)
     try {
       const response = await fetch('/api/content', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify(formData),
+        body: JSON.stringify({
+          venture_id: formData.venture_id,
+          topic: formData.topic,
+          original_text: generatedContent.postText,
+          edited_text: generatedContent.postText,
+          status: 'pending_review',
+        }),
       })
 
       if (response.ok) {
@@ -64,13 +189,21 @@ export default function NewContentPage() {
         router.push(`/content/${content.id}`)
       } else {
         const error = await response.json()
-        alert(error.error || 'Failed to generate content. Please try again.')
+        alert(error.error || 'Failed to save content. Please try again.')
       }
     } catch (error) {
-      console.error('Error generating content:', error)
+      console.error('Error saving content:', error)
       alert('An error occurred. Please try again.')
     } finally {
       setLoading(false)
+    }
+  }
+
+  function handleCopyToClipboard() {
+    if (generatedContent) {
+      navigator.clipboard.writeText(generatedContent.postText)
+      setCopied(true)
+      setTimeout(() => setCopied(false), 2000)
     }
   }
 
@@ -115,57 +248,59 @@ export default function NewContentPage() {
           </Button>
         </Link>
         <div>
-          <h1 className="text-3xl font-bold">Generate New Content</h1>
+          <h1 className="text-3xl font-bold flex items-center gap-2">
+            <Sparkles className="h-8 w-8 text-primary" />
+            AI Content Generator
+          </h1>
           <p className="text-muted-foreground mt-1">
-            Create AI-powered LinkedIn content
+            Create professional LinkedIn content in seconds
           </p>
         </div>
       </div>
 
-      {/* Form */}
-      <Card>
-        <CardHeader>
-          <CardTitle>Content Parameters</CardTitle>
-          <CardDescription>
-            Specify what you want to create
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
-          <form onSubmit={handleSubmit} className="space-y-6">
-            <div className="space-y-2">
-              <Label htmlFor="venture_id">Venture *</Label>
-              <Select
-                id="venture_id"
-                value={formData.venture_id}
-                onChange={(e) =>
-                  setFormData({ ...formData, venture_id: e.target.value })
-                }
-                required
-              >
-                {ventures.map((venture) => (
-                  <option key={venture.id} value={venture.id}>
-                    {venture.venture_name}
-                  </option>
-                ))}
-              </Select>
-            </div>
-
-            <div className="grid gap-6 md:grid-cols-2">
+      <div className="grid gap-6 lg:grid-cols-2">
+        {/* Form */}
+        <Card>
+          <CardHeader>
+            <CardTitle>Content Parameters</CardTitle>
+            <CardDescription>
+              Tell us what you want to create
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <form onSubmit={handleSubmit} className="space-y-6">
               <div className="space-y-2">
-                <Label htmlFor="content_type">Content Type *</Label>
+                <Label htmlFor="venture_id">Venture *</Label>
                 <Select
-                  id="content_type"
-                  value={formData.content_type}
+                  id="venture_id"
+                  value={formData.venture_id}
                   onChange={(e) =>
-                    setFormData({ ...formData, content_type: e.target.value })
+                    setFormData({ ...formData, venture_id: e.target.value })
                   }
                   required
                 >
-                  <option value="post">LinkedIn Post</option>
-                  <option value="article">Article</option>
-                  <option value="thought_leadership">Thought Leadership</option>
-                  <option value="announcement">Announcement</option>
+                  {ventures.map((venture) => (
+                    <option key={venture.id} value={venture.id}>
+                      {venture.venture_name}
+                    </option>
+                  ))}
                 </Select>
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="topic">Topic *</Label>
+                <Input
+                  id="topic"
+                  value={formData.topic}
+                  onChange={(e) =>
+                    setFormData({ ...formData, topic: e.target.value })
+                  }
+                  placeholder="e.g., The future of AI in software development"
+                  required
+                />
+                <p className="text-xs text-muted-foreground">
+                  Be specific to get better results
+                </p>
               </div>
 
               <div className="space-y-2">
@@ -181,54 +316,133 @@ export default function NewContentPage() {
                   <option value="professional">Professional</option>
                   <option value="casual">Casual</option>
                   <option value="inspirational">Inspirational</option>
-                  <option value="educational">Educational</option>
-                  <option value="conversational">Conversational</option>
+                  <option value="technical">Technical</option>
                 </Select>
               </div>
-            </div>
 
-            <div className="space-y-2">
-              <Label htmlFor="topic">Topic *</Label>
-              <Input
-                id="topic"
-                value={formData.topic}
-                onChange={(e) =>
-                  setFormData({ ...formData, topic: e.target.value })
-                }
-                placeholder="e.g., Latest industry trends in AI"
-                required
-              />
-            </div>
+              <div className="space-y-2">
+                <Label htmlFor="maxLength">Max Length (characters)</Label>
+                <Input
+                  id="maxLength"
+                  type="number"
+                  value={formData.maxLength}
+                  onChange={(e) =>
+                    setFormData({ ...formData, maxLength: parseInt(e.target.value) })
+                  }
+                  min={500}
+                  max={3000}
+                />
+                <p className="text-xs text-muted-foreground">
+                  Recommended: 1,200-1,800 for optimal engagement
+                </p>
+              </div>
 
-            <div className="space-y-2">
-              <Label htmlFor="keywords">Keywords (optional)</Label>
-              <Textarea
-                id="keywords"
-                value={formData.keywords}
-                onChange={(e) =>
-                  setFormData({ ...formData, keywords: e.target.value })
-                }
-                placeholder="Comma-separated keywords to include..."
-                rows={3}
-              />
-              <p className="text-xs text-muted-foreground">
-                Optional: Add specific keywords or themes you want included
-              </p>
-            </div>
+              <div className="flex items-center space-x-2">
+                <input
+                  type="checkbox"
+                  id="useStreaming"
+                  checked={formData.useStreaming}
+                  onChange={(e) =>
+                    setFormData({ ...formData, useStreaming: e.target.checked })
+                  }
+                  className="h-4 w-4 rounded border-gray-300"
+                />
+                <Label htmlFor="useStreaming" className="text-sm font-normal cursor-pointer">
+                  Enable real-time streaming (watch it write!)
+                </Label>
+              </div>
 
-            <div className="flex gap-4">
-              <Button type="submit" disabled={loading}>
-                {loading ? 'Generating...' : 'Generate Content'}
+              <Button
+                type="submit"
+                disabled={loading || streaming}
+                className="w-full"
+              >
+                {loading || streaming ? (
+                  <>
+                    <Sparkles className="mr-2 h-4 w-4 animate-spin" />
+                    Generating...
+                  </>
+                ) : (
+                  <>
+                    <Sparkles className="mr-2 h-4 w-4" />
+                    Generate Content
+                  </>
+                )}
               </Button>
-              <Link href="/content">
-                <Button type="button" variant="outline" disabled={loading}>
-                  Cancel
-                </Button>
-              </Link>
-            </div>
-          </form>
-        </CardContent>
-      </Card>
+            </form>
+          </CardContent>
+        </Card>
+
+        {/* Preview */}
+        <Card>
+          <CardHeader>
+            <CardTitle>Generated Content</CardTitle>
+            <CardDescription>
+              {generatedContent || streamedText
+                ? `${(generatedContent?.characterCount || streamedText.length).toLocaleString()} characters`
+                : 'Your content will appear here'}
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            {streaming && (
+              <div className="space-y-4">
+                <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                  <Sparkles className="h-4 w-4 animate-pulse text-primary" />
+                  Writing in real-time...
+                </div>
+                <div className="prose prose-sm max-w-none whitespace-pre-wrap border rounded-lg p-4 min-h-[400px] bg-muted/50">
+                  {streamedText}
+                  <span className="inline-block w-2 h-4 bg-primary animate-pulse ml-1" />
+                </div>
+              </div>
+            )}
+
+            {!streaming && generatedContent && (
+              <div className="space-y-4">
+                <div className="prose prose-sm max-w-none whitespace-pre-wrap border rounded-lg p-4 min-h-[400px]">
+                  {generatedContent.postText}
+                </div>
+
+                <div className="flex gap-2">
+                  <Button
+                    onClick={handleCopyToClipboard}
+                    variant="outline"
+                    className="flex-1"
+                  >
+                    {copied ? (
+                      <>
+                        <Check className="mr-2 h-4 w-4" />
+                        Copied!
+                      </>
+                    ) : (
+                      <>
+                        <Copy className="mr-2 h-4 w-4" />
+                        Copy to Clipboard
+                      </>
+                    )}
+                  </Button>
+                  <Button
+                    onClick={handleSaveToDatabase}
+                    disabled={loading}
+                    className="flex-1"
+                  >
+                    Save & Continue
+                  </Button>
+                </div>
+              </div>
+            )}
+
+            {!streaming && !generatedContent && (
+              <div className="flex flex-col items-center justify-center py-12 text-center">
+                <Sparkles className="h-12 w-12 text-muted-foreground/50 mb-4" />
+                <p className="text-muted-foreground">
+                  Fill in the form and click Generate to create AI-powered content
+                </p>
+              </div>
+            )}
+          </CardContent>
+        </Card>
+      </div>
     </div>
   )
 }
