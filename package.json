@@ -19,6 +19,7 @@
     "@langchain/google-genai": "^1.0.0",
     "@langchain/langgraph": "^1.0.0",
     "@langchain/openai": "^1.0.0",
+    "@radix-ui/react-separator": "^1.1.7",
     "@vercel/postgres": "^0.10.0",
     "ai": "^5.0.76",
     "class-variance-authority": "^0.7.1",

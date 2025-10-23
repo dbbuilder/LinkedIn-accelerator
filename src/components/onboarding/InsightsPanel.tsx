@@ -11,7 +11,7 @@ interface Insights {
   targetAudience?: string[]
   brandVoice?: string
   contentThemes?: string[]
-  [key: string]: any
+  [key: string]: string | string[] | undefined
 }
 
 interface InsightsPanelProps {
@@ -45,7 +45,7 @@ export function InsightsPanel({
     ([key, value]) => value !== undefined && value !== null
   )
 
-  const formatValue = (value: any): string => {
+  const formatValue = (value: string | string[] | undefined): string => {
     if (Array.isArray(value)) {
       return value.join(', ')
     }
@@ -62,7 +62,7 @@ export function InsightsPanel({
           <CardTitle className="text-xl">AI Insights</CardTitle>
         </div>
         <p className="text-sm text-muted-foreground">
-          Based on your business information, here's what we found
+          Based on your business information, here&apos;s what we found
         </p>
       </CardHeader>
 
@@ -86,7 +86,7 @@ export function InsightsPanel({
           <div className="space-y-3">
             {insightEntries.map(([key, value], index) => (
               <motion.div
-                key={key}
+                key={`${key}-${index}`}
                 initial={{ opacity: 0, x: -20 }}
                 animate={{ opacity: 1, x: 0 }}
                 transition={{

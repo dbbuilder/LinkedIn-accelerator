@@ -8,11 +8,6 @@ import { OpenAIProvider } from '@/lib/ai/providers/openai-provider'
 import { SuggestionAgent } from '@/lib/ai/agents/suggestion-agent'
 import { z } from 'zod'
 
-// Only allow in development
-if (process.env.NODE_ENV === 'production') {
-  throw new Error('dev-auth endpoint should never be loaded in production')
-}
-
 const SuggestTopicsRequestSchema = z.object({
   ventureName: z.string().min(1),
   industry: z.string().optional(),

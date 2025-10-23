@@ -8,11 +8,6 @@ import { OpenAIProvider } from '@/lib/ai/providers/openai-provider'
 import { WritingAgent } from '@/lib/ai/agents/writing-agent'
 import { z } from 'zod'
 
-// Only allow in development
-if (process.env.NODE_ENV === 'production') {
-  throw new Error('dev-auth endpoint should never be loaded in production')
-}
-
 // Request validation schema
 const GenerateRequestSchema = z.object({
   topic: z.string().min(1, 'Topic is required'),

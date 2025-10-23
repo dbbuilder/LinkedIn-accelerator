@@ -22,12 +22,12 @@ interface VentureInsights {
   targetAudience?: string[]
   brandVoice?: string
   contentThemes?: string[]
+  [key: string]: string | string[] | undefined
 }
 
 export default function NewVenturePage() {
   const router = useRouter()
   const [currentStep, setCurrentStep] = useState<OnboardingStep>('name')
-  const [loading, setLoading] = useState(false)
 
   // Basic venture data
   const [ventureName, setVentureName] = useState('')
@@ -36,7 +36,6 @@ export default function NewVenturePage() {
 
   // AI insights
   const [insights, setInsights] = useState<VentureInsights>({})
-  const [useAI, setUseAI] = useState(true)
 
   // Manual form data
   const [formData, setFormData] = useState({
@@ -52,7 +51,6 @@ export default function NewVenturePage() {
     if (!ventureName.trim()) return
 
     setCurrentStep('analyzing')
-    setLoading(true)
 
     try {
       const response = await fetch('/api/dev-auth/ai/analyze-venture', {
@@ -78,15 +76,12 @@ export default function NewVenturePage() {
       console.error('Error analyzing venture:', error)
       setCurrentStep('manual')
       setFormData({ ...formData, venture_name: ventureName })
-    } finally {
-      setLoading(false)
     }
   }
 
   // Step 2: Accept AI insights and create venture
   async function handleAcceptInsights() {
     setCurrentStep('creating')
-    setLoading(true)
 
     try {
       const ventureData = {
@@ -114,8 +109,6 @@ export default function NewVenturePage() {
       console.error('Error creating venture:', error)
       alert('An error occurred. Please try again.')
       setCurrentStep('insights')
-    } finally {
-      setLoading(false)
     }
   }
 
@@ -135,7 +128,6 @@ export default function NewVenturePage() {
   async function handleManualSubmit(e: React.FormEvent) {
     e.preventDefault()
     setCurrentStep('creating')
-    setLoading(true)
 
     try {
       const response = await fetch('/api/ventures', {
@@ -155,8 +147,6 @@ export default function NewVenturePage() {
       console.error('Error creating venture:', error)
       alert('An error occurred. Please try again.')
       setCurrentStep('manual')
-    } finally {
-      setLoading(false)
     }
   }
 
