@@ -67,17 +67,17 @@ export default async function ContentPage() {
   }
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-4 sm:space-y-6">
       {/* Header */}
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <h1 className="text-3xl font-bold">Content Library</h1>
-          <p className="text-muted-foreground mt-1">
+          <h1 className="text-2xl sm:text-3xl font-bold">Content Library</h1>
+          <p className="text-sm sm:text-base text-muted-foreground mt-1">
             Manage and review your AI-generated LinkedIn content
           </p>
         </div>
-        <Link href="/content/new">
-          <Button>
+        <Link href="/content/new" className="w-full sm:w-auto">
+          <Button className="w-full sm:w-auto">
             <Plus className="h-4 w-4 mr-2" />
             Generate Content
           </Button>
@@ -85,37 +85,37 @@ export default async function ContentPage() {
       </div>
 
       {/* Stats Cards */}
-      <div className="grid gap-4 md:grid-cols-4">
+      <div className="grid gap-3 sm:gap-4 grid-cols-2 md:grid-cols-4">
         <Card>
           <CardHeader className="pb-2">
-            <CardDescription>Total Content</CardDescription>
+            <CardDescription className="text-xs sm:text-sm">Total Content</CardDescription>
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{stats.total}</div>
+            <div className="text-xl sm:text-2xl font-bold">{stats.total}</div>
           </CardContent>
         </Card>
         <Card>
           <CardHeader className="pb-2">
-            <CardDescription>Drafts</CardDescription>
+            <CardDescription className="text-xs sm:text-sm">Drafts</CardDescription>
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold text-yellow-600">{stats.draft}</div>
+            <div className="text-xl sm:text-2xl font-bold text-yellow-600">{stats.draft}</div>
           </CardContent>
         </Card>
         <Card>
           <CardHeader className="pb-2">
-            <CardDescription>Approved</CardDescription>
+            <CardDescription className="text-xs sm:text-sm">Approved</CardDescription>
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold text-green-600">{stats.approved}</div>
+            <div className="text-xl sm:text-2xl font-bold text-green-600">{stats.approved}</div>
           </CardContent>
         </Card>
         <Card>
           <CardHeader className="pb-2">
-            <CardDescription>Rejected</CardDescription>
+            <CardDescription className="text-xs sm:text-sm">Rejected</CardDescription>
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold text-red-600">{stats.rejected}</div>
+            <div className="text-xl sm:text-2xl font-bold text-red-600">{stats.rejected}</div>
           </CardContent>
         </Card>
       </div>
@@ -144,55 +144,97 @@ export default async function ContentPage() {
           </CardContent>
         </Card>
       ) : (
-        <Card>
-          <CardHeader>
-            <CardTitle>All Content</CardTitle>
-            <CardDescription>
-              {content.length} {content.length === 1 ? 'post' : 'posts'} total
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>Topic</TableHead>
-                  <TableHead>Type</TableHead>
-                  <TableHead>Tone</TableHead>
-                  <TableHead>Status</TableHead>
-                  <TableHead>Created</TableHead>
-                  <TableHead className="text-right">Actions</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {content.map((item) => (
-                  <TableRow key={item.id}>
-                    <TableCell className="font-medium max-w-xs truncate">
-                      {item.topic}
-                    </TableCell>
-                    <TableCell>
-                      <Badge variant="outline">{item.content_type}</Badge>
-                    </TableCell>
-                    <TableCell>
-                      <Badge variant="secondary">{item.tone}</Badge>
-                    </TableCell>
-                    <TableCell>{getStatusBadge(item.status)}</TableCell>
-                    <TableCell>
-                      {new Date(item.created_at).toLocaleDateString()}
-                    </TableCell>
-                    <TableCell className="text-right">
+        <>
+          {/* Mobile Card View */}
+          <div className="md:hidden space-y-3">
+            {content.map((item) => (
+              <Card key={item.id}>
+                <CardContent className="p-4">
+                  <div className="space-y-3">
+                    <div className="flex items-start justify-between gap-2">
+                      <h3 className="font-medium text-sm line-clamp-2 flex-1">
+                        {item.topic}
+                      </h3>
+                      {getStatusBadge(item.status)}
+                    </div>
+
+                    <div className="flex flex-wrap gap-2">
+                      <Badge variant="outline" className="text-xs">
+                        {item.content_type}
+                      </Badge>
+                      <Badge variant="secondary" className="text-xs">
+                        {item.tone}
+                      </Badge>
+                    </div>
+
+                    <div className="flex items-center justify-between pt-2 border-t">
+                      <span className="text-xs text-muted-foreground">
+                        {new Date(item.created_at).toLocaleDateString()}
+                      </span>
                       <Link href={`/content/${item.id}`}>
-                        <Button variant="ghost" size="sm">
-                          <Eye className="h-4 w-4 mr-2" />
+                        <Button variant="ghost" size="sm" className="h-8">
+                          <Eye className="h-3 w-3 mr-1" />
                           View
                         </Button>
                       </Link>
-                    </TableCell>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+
+          {/* Desktop Table View */}
+          <Card className="hidden md:block">
+            <CardHeader>
+              <CardTitle>All Content</CardTitle>
+              <CardDescription>
+                {content.length} {content.length === 1 ? 'post' : 'posts'} total
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>Topic</TableHead>
+                    <TableHead>Type</TableHead>
+                    <TableHead>Tone</TableHead>
+                    <TableHead>Status</TableHead>
+                    <TableHead>Created</TableHead>
+                    <TableHead className="text-right">Actions</TableHead>
                   </TableRow>
-                ))}
-              </TableBody>
-            </Table>
-          </CardContent>
-        </Card>
+                </TableHeader>
+                <TableBody>
+                  {content.map((item) => (
+                    <TableRow key={item.id}>
+                      <TableCell className="font-medium max-w-xs truncate">
+                        {item.topic}
+                      </TableCell>
+                      <TableCell>
+                        <Badge variant="outline">{item.content_type}</Badge>
+                      </TableCell>
+                      <TableCell>
+                        <Badge variant="secondary">{item.tone}</Badge>
+                      </TableCell>
+                      <TableCell>{getStatusBadge(item.status)}</TableCell>
+                      <TableCell>
+                        {new Date(item.created_at).toLocaleDateString()}
+                      </TableCell>
+                      <TableCell className="text-right">
+                        <Link href={`/content/${item.id}`}>
+                          <Button variant="ghost" size="sm">
+                            <Eye className="h-4 w-4 mr-2" />
+                            View
+                          </Button>
+                        </Link>
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            </CardContent>
+          </Card>
+        </>
       )}
     </div>
   )

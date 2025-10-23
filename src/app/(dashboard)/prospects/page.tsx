@@ -54,17 +54,17 @@ export default async function ProspectsPage() {
   }
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-4 sm:space-y-6">
       {/* Header */}
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <h1 className="text-3xl font-bold">Network Prospects</h1>
-          <p className="text-muted-foreground mt-1">
+          <h1 className="text-2xl sm:text-3xl font-bold">Network Prospects</h1>
+          <p className="text-sm sm:text-base text-muted-foreground mt-1">
             Track and engage with your professional network
           </p>
         </div>
-        <Link href="/prospects/new">
-          <Button>
+        <Link href="/prospects/new" className="w-full sm:w-auto">
+          <Button className="w-full sm:w-auto">
             <Plus className="h-4 w-4 mr-2" />
             Add Prospect
           </Button>
@@ -72,37 +72,37 @@ export default async function ProspectsPage() {
       </div>
 
       {/* Stats Cards */}
-      <div className="grid gap-4 md:grid-cols-4">
+      <div className="grid gap-3 sm:gap-4 grid-cols-2 md:grid-cols-4">
         <Card>
           <CardHeader className="pb-2">
-            <CardDescription>Total Prospects</CardDescription>
+            <CardDescription className="text-xs sm:text-sm">Total Prospects</CardDescription>
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{stats.total}</div>
+            <div className="text-xl sm:text-2xl font-bold">{stats.total}</div>
           </CardContent>
         </Card>
         <Card>
           <CardHeader className="pb-2">
-            <CardDescription>High Engagement</CardDescription>
+            <CardDescription className="text-xs sm:text-sm">High Engagement</CardDescription>
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold text-green-600">{stats.high}</div>
+            <div className="text-xl sm:text-2xl font-bold text-green-600">{stats.high}</div>
           </CardContent>
         </Card>
         <Card>
           <CardHeader className="pb-2">
-            <CardDescription>Contacted</CardDescription>
+            <CardDescription className="text-xs sm:text-sm">Contacted</CardDescription>
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold text-blue-600">{stats.contacted}</div>
+            <div className="text-xl sm:text-2xl font-bold text-blue-600">{stats.contacted}</div>
           </CardContent>
         </Card>
         <Card>
           <CardHeader className="pb-2">
-            <CardDescription>Pending Outreach</CardDescription>
+            <CardDescription className="text-xs sm:text-sm">Pending Outreach</CardDescription>
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold text-yellow-600">{stats.pending}</div>
+            <div className="text-xl sm:text-2xl font-bold text-yellow-600">{stats.pending}</div>
           </CardContent>
         </Card>
       </div>
@@ -131,77 +131,142 @@ export default async function ProspectsPage() {
           </CardContent>
         </Card>
       ) : (
-        <Card>
-          <CardHeader>
-            <CardTitle>All Prospects</CardTitle>
-            <CardDescription>
-              {prospects.length} {prospects.length === 1 ? 'prospect' : 'prospects'} in your network
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>Name</TableHead>
-                  <TableHead>Company</TableHead>
-                  <TableHead>Job Title</TableHead>
-                  <TableHead>Engagement</TableHead>
-                  <TableHead>Last Contact</TableHead>
-                  <TableHead className="text-right">Actions</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {prospects.map((prospect) => (
-                  <TableRow key={prospect.id}>
-                    <TableCell className="font-medium">
-                      <div className="flex flex-col">
-                        <span>{prospect.full_name}</span>
+        <>
+          {/* Mobile Card View */}
+          <div className="md:hidden space-y-3">
+            {prospects.map((prospect) => (
+              <Card key={prospect.id}>
+                <CardContent className="p-4">
+                  <div className="space-y-3">
+                    <div className="flex items-start justify-between gap-2">
+                      <div className="flex-1 min-w-0">
+                        <h3 className="font-medium text-sm truncate">{prospect.full_name}</h3>
                         <a
                           href={prospect.linkedin_url}
                           target="_blank"
                           rel="noopener noreferrer"
                           className="text-xs text-primary hover:underline"
                         >
-                          LinkedIn Profile
+                          LinkedIn
                         </a>
                       </div>
-                    </TableCell>
-                    <TableCell>{prospect.company || '—'}</TableCell>
-                    <TableCell>{prospect.job_title || '—'}</TableCell>
-                    <TableCell>{getEngagementBadge(prospect.engagement_level)}</TableCell>
-                    <TableCell>
-                      {prospect.last_outreach ? (
-                        <div className="flex items-center gap-1 text-sm">
-                          <Check className="h-3 w-3 text-green-600" />
-                          {new Date(prospect.last_outreach).toLocaleDateString()}
-                        </div>
-                      ) : (
-                        <div className="flex items-center gap-1 text-sm text-muted-foreground">
-                          <Clock className="h-3 w-3" />
-                          Not contacted
-                        </div>
-                      )}
-                    </TableCell>
-                    <TableCell className="text-right">
-                      <div className="flex justify-end gap-2">
+                      {getEngagementBadge(prospect.engagement_level)}
+                    </div>
+
+                    {(prospect.company || prospect.job_title) && (
+                      <p className="text-xs text-muted-foreground line-clamp-1">
+                        {prospect.job_title && prospect.company
+                          ? `${prospect.job_title} at ${prospect.company}`
+                          : prospect.job_title || prospect.company}
+                      </p>
+                    )}
+
+                    <div className="flex items-center justify-between pt-2 border-t">
+                      <div className="text-xs text-muted-foreground flex items-center gap-1">
+                        {prospect.last_outreach ? (
+                          <>
+                            <Check className="h-3 w-3 text-green-600" />
+                            {new Date(prospect.last_outreach).toLocaleDateString()}
+                          </>
+                        ) : (
+                          <>
+                            <Clock className="h-3 w-3" />
+                            Not contacted
+                          </>
+                        )}
+                      </div>
+                      <div className="flex gap-2">
                         <Link href={`/prospects/${prospect.id}`}>
-                          <Button variant="ghost" size="sm">
-                            <Eye className="h-4 w-4" />
+                          <Button variant="ghost" size="sm" className="h-8">
+                            <Eye className="h-3 w-3" />
                           </Button>
                         </Link>
                         <Link href={`/prospects/${prospect.id}#outreach`}>
-                          <Button variant="ghost" size="sm">
-                            <Mail className="h-4 w-4" />
+                          <Button variant="ghost" size="sm" className="h-8">
+                            <Mail className="h-3 w-3" />
                           </Button>
                         </Link>
                       </div>
-                    </TableCell>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+
+          {/* Desktop Table View */}
+          <Card className="hidden md:block">
+            <CardHeader>
+              <CardTitle>All Prospects</CardTitle>
+              <CardDescription>
+                {prospects.length} {prospects.length === 1 ? 'prospect' : 'prospects'} in your network
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>Name</TableHead>
+                    <TableHead>Company</TableHead>
+                    <TableHead>Job Title</TableHead>
+                    <TableHead>Engagement</TableHead>
+                    <TableHead>Last Contact</TableHead>
+                    <TableHead className="text-right">Actions</TableHead>
                   </TableRow>
-                ))}
-              </TableBody>
-            </Table>
-          </CardContent>
-        </Card>
+                </TableHeader>
+                <TableBody>
+                  {prospects.map((prospect) => (
+                    <TableRow key={prospect.id}>
+                      <TableCell className="font-medium">
+                        <div className="flex flex-col">
+                          <span>{prospect.full_name}</span>
+                          <a
+                            href={prospect.linkedin_url}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="text-xs text-primary hover:underline"
+                          >
+                            LinkedIn Profile
+                          </a>
+                        </div>
+                      </TableCell>
+                      <TableCell>{prospect.company || '—'}</TableCell>
+                      <TableCell>{prospect.job_title || '—'}</TableCell>
+                      <TableCell>{getEngagementBadge(prospect.engagement_level)}</TableCell>
+                      <TableCell>
+                        {prospect.last_outreach ? (
+                          <div className="flex items-center gap-1 text-sm">
+                            <Check className="h-3 w-3 text-green-600" />
+                            {new Date(prospect.last_outreach).toLocaleDateString()}
+                          </div>
+                        ) : (
+                          <div className="flex items-center gap-1 text-sm text-muted-foreground">
+                            <Clock className="h-3 w-3" />
+                            Not contacted
+                          </div>
+                        )}
+                      </TableCell>
+                      <TableCell className="text-right">
+                        <div className="flex justify-end gap-2">
+                          <Link href={`/prospects/${prospect.id}`}>
+                            <Button variant="ghost" size="sm">
+                              <Eye className="h-4 w-4" />
+                            </Button>
+                          </Link>
+                          <Link href={`/prospects/${prospect.id}#outreach`}>
+                            <Button variant="ghost" size="sm">
+                              <Mail className="h-4 w-4" />
+                            </Button>
+                          </Link>
+                        </div>
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            </CardContent>
+          </Card>
+        </>
       )}
     </div>
   )

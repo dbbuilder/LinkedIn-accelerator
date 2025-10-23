@@ -32,17 +32,17 @@ export default async function VenturesPage() {
   const ventures = await getVentures()
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-4 sm:space-y-6">
       {/* Header */}
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <h1 className="text-3xl font-bold">Your Ventures</h1>
-          <p className="text-muted-foreground mt-1">
+          <h1 className="text-2xl sm:text-3xl font-bold">Your Ventures</h1>
+          <p className="text-sm sm:text-base text-muted-foreground mt-1">
             Manage your professional ventures and brand identities
           </p>
         </div>
-        <Link href="/ventures/new">
-          <Button>
+        <Link href="/ventures/new" className="w-full sm:w-auto">
+          <Button className="w-full sm:w-auto">
             <Plus className="h-4 w-4 mr-2" />
             New Venture
           </Button>
@@ -73,61 +73,108 @@ export default async function VenturesPage() {
           </CardContent>
         </Card>
       ) : (
-        <Card>
-          <CardHeader>
-            <CardTitle>All Ventures</CardTitle>
-            <CardDescription>
-              {ventures.length} {ventures.length === 1 ? 'venture' : 'ventures'} total
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>Venture Name</TableHead>
-                  <TableHead>Industry</TableHead>
-                  <TableHead>Target Audience</TableHead>
-                  <TableHead>Brand Guide</TableHead>
-                  <TableHead>Created</TableHead>
-                  <TableHead className="text-right">Actions</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {ventures.map((venture) => (
-                  <TableRow key={venture.id}>
-                    <TableCell className="font-medium">
-                      {venture.venture_name}
-                    </TableCell>
-                    <TableCell>
-                      <Badge variant="outline">{venture.industry}</Badge>
-                    </TableCell>
-                    <TableCell className="max-w-xs truncate">
-                      {venture.target_audience}
-                    </TableCell>
-                    <TableCell>
+        <>
+          {/* Mobile Card View */}
+          <div className="md:hidden space-y-3">
+            {ventures.map((venture) => (
+              <Card key={venture.id}>
+                <CardContent className="p-4">
+                  <div className="space-y-3">
+                    <div className="flex items-start justify-between gap-2">
+                      <h3 className="font-medium text-sm line-clamp-1 flex-1">
+                        {venture.venture_name}
+                      </h3>
                       {venture.has_brand_guide ? (
-                        <Badge variant="success">Active</Badge>
+                        <Badge variant="success" className="text-xs">Active</Badge>
                       ) : (
-                        <Badge variant="secondary">Not Set</Badge>
+                        <Badge variant="secondary" className="text-xs">Not Set</Badge>
                       )}
-                    </TableCell>
-                    <TableCell>
-                      {new Date(venture.created_at).toLocaleDateString()}
-                    </TableCell>
-                    <TableCell className="text-right">
+                    </div>
+
+                    <div className="flex flex-wrap gap-2">
+                      <Badge variant="outline" className="text-xs">
+                        {venture.industry}
+                      </Badge>
+                    </div>
+
+                    <p className="text-xs text-muted-foreground line-clamp-2">
+                      {venture.target_audience}
+                    </p>
+
+                    <div className="flex items-center justify-between pt-2 border-t">
+                      <span className="text-xs text-muted-foreground">
+                        {new Date(venture.created_at).toLocaleDateString()}
+                      </span>
                       <Link href={`/ventures/${venture.id}`}>
-                        <Button variant="ghost" size="sm">
-                          <Eye className="h-4 w-4 mr-2" />
+                        <Button variant="ghost" size="sm" className="h-8">
+                          <Eye className="h-3 w-3 mr-1" />
                           View
                         </Button>
                       </Link>
-                    </TableCell>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+
+          {/* Desktop Table View */}
+          <Card className="hidden md:block">
+            <CardHeader>
+              <CardTitle>All Ventures</CardTitle>
+              <CardDescription>
+                {ventures.length} {ventures.length === 1 ? 'venture' : 'ventures'} total
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>Venture Name</TableHead>
+                    <TableHead>Industry</TableHead>
+                    <TableHead>Target Audience</TableHead>
+                    <TableHead>Brand Guide</TableHead>
+                    <TableHead>Created</TableHead>
+                    <TableHead className="text-right">Actions</TableHead>
                   </TableRow>
-                ))}
-              </TableBody>
-            </Table>
-          </CardContent>
-        </Card>
+                </TableHeader>
+                <TableBody>
+                  {ventures.map((venture) => (
+                    <TableRow key={venture.id}>
+                      <TableCell className="font-medium">
+                        {venture.venture_name}
+                      </TableCell>
+                      <TableCell>
+                        <Badge variant="outline">{venture.industry}</Badge>
+                      </TableCell>
+                      <TableCell className="max-w-xs truncate">
+                        {venture.target_audience}
+                      </TableCell>
+                      <TableCell>
+                        {venture.has_brand_guide ? (
+                          <Badge variant="success">Active</Badge>
+                        ) : (
+                          <Badge variant="secondary">Not Set</Badge>
+                        )}
+                      </TableCell>
+                      <TableCell>
+                        {new Date(venture.created_at).toLocaleDateString()}
+                      </TableCell>
+                      <TableCell className="text-right">
+                        <Link href={`/ventures/${venture.id}`}>
+                          <Button variant="ghost" size="sm">
+                            <Eye className="h-4 w-4 mr-2" />
+                            View
+                          </Button>
+                        </Link>
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            </CardContent>
+          </Card>
+        </>
       )}
     </div>
   )

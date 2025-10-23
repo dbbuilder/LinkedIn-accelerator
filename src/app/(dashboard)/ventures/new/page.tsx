@@ -165,17 +165,17 @@ export default function NewVenturePage() {
   const completedSteps = Array.from({ length: currentStepIndex }, (_, i) => i)
 
   return (
-    <div className="space-y-8 max-w-4xl mx-auto pb-16">
+    <div className="space-y-4 sm:space-y-6 md:space-y-8 max-w-4xl mx-auto pb-8 sm:pb-12 md:pb-16">
       {/* Header */}
-      <div className="flex items-center gap-4">
+      <div className="flex items-center gap-3 sm:gap-4">
         <Link href="/ventures">
-          <Button variant="ghost" size="icon">
+          <Button variant="ghost" size="icon" className="flex-shrink-0">
             <ArrowLeft className="h-4 w-4" />
           </Button>
         </Link>
-        <div className="flex-1">
-          <h1 className="text-3xl font-bold">Create New Venture</h1>
-          <p className="text-muted-foreground mt-1">
+        <div className="flex-1 min-w-0">
+          <h1 className="text-xl sm:text-2xl md:text-3xl font-bold truncate">Create New Venture</h1>
+          <p className="text-sm sm:text-base text-muted-foreground mt-1">
             Let AI help you set up your professional venture
           </p>
         </div>
@@ -203,11 +203,11 @@ export default function NewVenturePage() {
               aiMessage="Let's get started! Tell me your business name and I'll use AI to analyze it and suggest industry, audience, and content themes."
               showAIAssistant
             >
-              <Card className="p-6">
-                <div className="space-y-6">
+              <Card className="p-4 sm:p-6">
+                <div className="space-y-4 sm:space-y-6">
                   {/* Business Name */}
                   <div className="space-y-2">
-                    <Label htmlFor="ventureName">
+                    <Label htmlFor="ventureName" className="text-sm sm:text-base">
                       Business Name <span className="text-destructive">*</span>
                     </Label>
                     <Input
@@ -216,14 +216,14 @@ export default function NewVenturePage() {
                       onChange={(e) => setVentureName(e.target.value)}
                       placeholder="e.g., TechFlow AI Solutions"
                       autoFocus
-                      className="text-lg"
+                      className="text-base sm:text-lg"
                     />
                   </div>
 
                   {/* Website (Optional) */}
                   <div className="space-y-2">
-                    <Label htmlFor="website">
-                      Website <span className="text-muted-foreground text-sm">(optional)</span>
+                    <Label htmlFor="website" className="text-sm sm:text-base">
+                      Website <span className="text-muted-foreground text-xs sm:text-sm">(optional)</span>
                     </Label>
                     <Input
                       id="website"
@@ -231,6 +231,7 @@ export default function NewVenturePage() {
                       value={website}
                       onChange={(e) => setWebsite(e.target.value)}
                       placeholder="https://yourwebsite.com"
+                      className="text-sm sm:text-base"
                     />
                     <p className="text-xs text-muted-foreground">
                       Providing a website URL helps AI give better suggestions
@@ -239,8 +240,8 @@ export default function NewVenturePage() {
 
                   {/* Description (Optional) */}
                   <div className="space-y-2">
-                    <Label htmlFor="description">
-                      Brief Description <span className="text-muted-foreground text-sm">(optional)</span>
+                    <Label htmlFor="description" className="text-sm sm:text-base">
+                      Brief Description <span className="text-muted-foreground text-xs sm:text-sm">(optional)</span>
                     </Label>
                     <Textarea
                       id="description"
@@ -248,16 +249,17 @@ export default function NewVenturePage() {
                       onChange={(e) => setDescription(e.target.value)}
                       placeholder="What does your business do?"
                       rows={3}
+                      className="text-sm sm:text-base"
                     />
                   </div>
 
                   {/* Action Buttons */}
-                  <div className="flex flex-col sm:flex-row gap-3 pt-4">
+                  <div className="flex flex-col sm:flex-row gap-3 pt-2 sm:pt-4">
                     <Button
                       onClick={handleAnalyze}
                       disabled={!ventureName.trim()}
                       size="lg"
-                      className="flex-1 group"
+                      className="flex-1 group text-sm sm:text-base"
                     >
                       <Sparkles className="w-4 h-4 mr-2" />
                       Analyze with AI
@@ -278,6 +280,7 @@ export default function NewVenturePage() {
                       variant="outline"
                       size="lg"
                       disabled={!ventureName.trim()}
+                      className="text-sm sm:text-base"
                     >
                       Fill Manually Instead
                     </Button>
@@ -302,12 +305,12 @@ export default function NewVenturePage() {
               isLoading
               showAIAssistant
             >
-              <Card className="p-6">
+              <Card className="p-4 sm:p-6">
                 <div className="space-y-3">
-                  <Skeleton className="h-20 w-full" />
-                  <Skeleton className="h-20 w-full" />
-                  <Skeleton className="h-20 w-full" />
-                  <Skeleton className="h-20 w-full" />
+                  <Skeleton className="h-16 sm:h-20 w-full" />
+                  <Skeleton className="h-16 sm:h-20 w-full" />
+                  <Skeleton className="h-16 sm:h-20 w-full" />
+                  <Skeleton className="h-16 sm:h-20 w-full" />
                 </div>
               </Card>
             </ConversationalStep>
@@ -352,10 +355,10 @@ export default function NewVenturePage() {
               }
               showAIAssistant
             >
-              <Card className="p-6">
-                <form onSubmit={handleManualSubmit} className="space-y-6">
+              <Card className="p-4 sm:p-6">
+                <form onSubmit={handleManualSubmit} className="space-y-4 sm:space-y-6">
                   <div className="space-y-2">
-                    <Label htmlFor="venture_name">
+                    <Label htmlFor="venture_name" className="text-sm sm:text-base">
                       Venture Name <span className="text-destructive">*</span>
                     </Label>
                     <Input
@@ -364,11 +367,12 @@ export default function NewVenturePage() {
                       onChange={(e) => setFormData({ ...formData, venture_name: e.target.value })}
                       placeholder="e.g., Tech Consulting Services"
                       required
+                      className="text-sm sm:text-base"
                     />
                   </div>
 
                   <div className="space-y-2">
-                    <Label htmlFor="industry">
+                    <Label htmlFor="industry" className="text-sm sm:text-base">
                       Industry <span className="text-destructive">*</span>
                     </Label>
                     <Input
@@ -377,11 +381,12 @@ export default function NewVenturePage() {
                       onChange={(e) => setFormData({ ...formData, industry: e.target.value })}
                       placeholder="e.g., Technology, Healthcare, Finance"
                       required
+                      className="text-sm sm:text-base"
                     />
                   </div>
 
                   <div className="space-y-2">
-                    <Label htmlFor="target_audience">
+                    <Label htmlFor="target_audience" className="text-sm sm:text-base">
                       Target Audience <span className="text-destructive">*</span>
                     </Label>
                     <Textarea
@@ -391,11 +396,12 @@ export default function NewVenturePage() {
                       placeholder="Describe who you serve..."
                       rows={3}
                       required
+                      className="text-sm sm:text-base"
                     />
                   </div>
 
                   <div className="space-y-2">
-                    <Label htmlFor="unique_value_prop">
+                    <Label htmlFor="unique_value_prop" className="text-sm sm:text-base">
                       Unique Value Proposition <span className="text-destructive">*</span>
                     </Label>
                     <Textarea
@@ -405,11 +411,12 @@ export default function NewVenturePage() {
                       placeholder="What makes you different?"
                       rows={3}
                       required
+                      className="text-sm sm:text-base"
                     />
                   </div>
 
                   <div className="space-y-2">
-                    <Label htmlFor="key_offerings">
+                    <Label htmlFor="key_offerings" className="text-sm sm:text-base">
                       Key Offerings <span className="text-destructive">*</span>
                     </Label>
                     <Textarea
@@ -419,11 +426,12 @@ export default function NewVenturePage() {
                       placeholder="What services or products do you offer?"
                       rows={4}
                       required
+                      className="text-sm sm:text-base"
                     />
                   </div>
 
-                  <div className="flex gap-4 pt-4">
-                    <Button type="submit" size="lg" className="flex-1">
+                  <div className="flex flex-col sm:flex-row gap-3 pt-2 sm:pt-4">
+                    <Button type="submit" size="lg" className="flex-1 text-sm sm:text-base">
                       Create Venture
                     </Button>
                     <Button
@@ -431,6 +439,7 @@ export default function NewVenturePage() {
                       variant="outline"
                       size="lg"
                       onClick={() => setCurrentStep('name')}
+                      className="text-sm sm:text-base"
                     >
                       Back
                     </Button>
@@ -454,11 +463,11 @@ export default function NewVenturePage() {
               isLoading
               showAIAssistant
             >
-              <Card className="p-12">
+              <Card className="p-8 sm:p-12">
                 <div className="flex flex-col items-center justify-center text-center space-y-4">
-                  <Loader2 className="w-12 h-12 animate-spin text-primary" />
-                  <p className="text-lg font-medium">Setting up your venture...</p>
-                  <p className="text-sm text-muted-foreground">
+                  <Loader2 className="w-10 h-10 sm:w-12 sm:h-12 animate-spin text-primary" />
+                  <p className="text-base sm:text-lg font-medium">Setting up your venture...</p>
+                  <p className="text-xs sm:text-sm text-muted-foreground">
                     This will only take a moment
                   </p>
                 </div>
